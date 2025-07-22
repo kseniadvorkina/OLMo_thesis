@@ -1,47 +1,123 @@
 # Master Thesis: Temporal Adaptation Techniques in Diachronic Language Modelling
-This repository contains the codebase for the master’s thesis Temporal Adaptation Techniques in Diachronic Language Modelling.
-It implements several fine-tuning and adaptation strategies for historical language modelling, including a Mixture of Experts (MoE) architecture trained on temporally split English corpora. Key components include temporal conditioning, soft-gated expert selection, and a continuous year prediction heuristic based on gating probabilities. Experiments are conducted on the CLMET corpus, with model training based on OLMo and Hugging Face libraries.
 
-This repository is structuree as follows...
+This repository contains the codebase for the master’s thesis *Temporal Adaptation Techniques in Diachronic Language Modelling*.  
+It implements several fine-tuning and adaptation strategies for historical language modelling, including a Mixture of Experts (MoE) architecture trained on temporally split English corpora.  
+Key components include temporal conditioning, soft-gated expert selection, and a continuous year prediction heuristic based on gating probabilities.  
+Experiments are conducted on the CLMET corpus, using OLMo models and the Hugging Face ecosystem.
 
-## Computational resorces
+---
 
-All experiments in this thesis were conducted using the Galadriel node on SLURM cluster the University of Vienna. To replicated model training and evaluation, standart PC is not sufficient, and bigger computational capacotoes are required. 
-Node used ofr this thesis is equipped with four NVIDIA H100 Tensor Core GPUs, 192 logical CPU cores, and approximately 2 TB of RAM. The system runs on an x86_64 architecture and uses the Miniforge distribution for environment management. At least one such GPU is reired to replicate results of this thesis.
-A dedicated Python virtual environment was used for all jobs. Exact list of needed libraries is availible in requirements.txt.
+## Repository Structure
 
-To run jobs on the SLURM cluster, Terminal scripts .sh are ctreated. They outline required computational resources for every job and define logging. Jobs were then run via sbatch, and the outpit was later taken from the log files. In addition, we save model after fine-tuning and save gating weights for MoE. We provide sample shell fine for full finetuning and MoE in respectfull folders.
+This repository is structured as follows:
+
+- `full_fine_tuning/`: Scripts for full fine-tuning with various temporal adaptation strategies (models B–F)
+- `MoE/`: Scripts for training and evaluating Mixture of Experts
+- `data_cleaning_CLMET.ipynb`: Preprocessing and cleaning of the CLMET dataset
+- `year_prediction.ipynb`: Predicts publication year from MoE gate weights
+- `requirements.txt`: Python dependencies
+- Sample `.sh` scripts: SLURM job definitions for training and evaluation
+
+---
+
+## Computational Resources
+
+All experiments were conducted on the **Galadriel** node of the SLURM cluster at the University of Vienna.  
+Due to the scale of the models and data, training and evaluation cannot be replicated on a standard PC. Access to substantial compute is required.
+
+**Galadriel node specifications:**
+
+- 4× NVIDIA H100 Tensor Core GPUs  
+- 192 logical CPU cores  
+- ~2 TB of RAM  
+- `x86_64` architecture  
+- Miniforge-based Python environment
+
+A dedicated virtual environment was used for all experiments.  
+Dependencies are listed in `requirements.txt`.
+
+Jobs were submitted using SLURM with `.sh` shell scripts.  
+These scripts define resource requests and log outputs.  
+Models and MoE gate weights were saved after each run.  
+Sample job scripts are available in the respective folders.
+
+---
 
 ## Data Preparation
 
-This thesis employs CLMET 3.1 as dataset. This corpues is freely availible to download at https://fedora.clarin-d.uni-saarland.de/clmet/clmet.html.
+The thesis uses **CLMET 3.1**, a diachronic English corpus.  
+Download it from: [https://fedora.clarin-d.uni-saarland.de/clmet/clmet.html](https://fedora.clarin-d.uni-saarland.de/clmet/clmet.html)
 
-To pre-process the data, clean and aplit it, jupited notebook data_cleaning_CLMET.ipynb was used. To reproduce this research, please download CLMET and follow steps in this notebook. Then, save train_df, val_df, test_df to your designated folder.
+To prepare the data:
 
-## Full fine-tuning
-During the full fine-tuning, we use varuios temporal adaptation strategies. To illustrate the various temporal embedding strategies, we use a sample text CLMET3_1_1_67. This sample, beginning with the phrase “Preface Of The Author.” and dated to the year 1776, serves as a running example to show how each temporal embedding is incorporated during the encoding preparation phase.  (see table):
+1. Open and run `data_cleaning_CLMET.ipynb`
+2. Follow the notebook steps to clean, split, and save:
+   - `train_df.pkl`
+   - `val_df.pkl`
+   - `test_df.pkl`
 
-Model	Model Description	Embedding	Example Input (for CLMET3_1_1_67 text)
-B	Fine-tuned OLMo 1B	No temporal conditioning	Preface Of The Author...
-C	Fine-tuned OLMo 1B + year ranges as special tokens	Special year range tokens like [1710–1780], [1780–1850] and [1850–1920] prepended	[1710–1780] Preface Of The Author...
-D	Fine-tuned OLMo 1B + year range in natural language prompts	Year range in natural language	This is English text written between 1710 and 1780.\n\nPreface Of The Author...
-E	Fine-tuned OLMo 1B + exact year in natural language prompts	Exact year in natural language	This text was written in the year 1776.\n\nPreface Of The Author...
-F	Fine-tuned OLMo 1B + exact year (word) in natural language	Exact year as a single word in natural language	1776.\n\nPreface Of The Author...
+Place the resulting files in your designated data directory.
 
-For each adaptation strategy, we provide a separate pythin script for training and eval, and for testing. All scripts are named after model configuration (B-F) are are made availible in the subfolder full_fine_tuning. Scripts for evaluation strategies with fake temporal embeddings for models C-F are also availible in this folder.
+---
 
-Scripts of models D-F only differ in natural language prompt from the function prepare_chunks, while for the model C we also add tokens and resize the tokeniser, and for the model B we do not use any explicit temporal embeddings.
+## Full Fine-Tuning
 
-## Mixture of Experts
+We test several temporal adaptation strategies using full fine-tuning.  
+To illustrate the input transformations, we use a sample text (`CLMET3_1_1_67`, year: 1776, opening: *"Preface Of The Author."*).
 
-To adapt existing data split for Mixture of Experts, pleqase simply stratify the exiting train_df, val_df, test_df by yearRange column and save nine resulting datasets in a designated folder.
+| Model | Description | Temporal Embedding | Example Input |
+|-------|-------------|---------------------|----------------|
+| **B** | OLMo 1B (no temporal context) | None | `Preface Of The Author...` |
+| **C** | OLMo 1B + year range tokens | Special token | `[1710–1780] Preface Of The Author...` |
+| **D** | OLMo 1B + year range prompt | Natural language | `This is English text written between 1710 and 1780.\n\nPreface Of The Author...` |
+| **E** | OLMo 1B + exact year prompt | Natural language | `This text was written in the year 1776.\n\nPreface Of The Author...` |
+| **F** | OLMo 1B + exact year as word | Natural language | `1776.\n\nPreface Of The Author...` |
 
-Then, we use strategies B, C and E from the fine-tuning section to create subsets of experts. To achieve this, simply take the desired script from the privious section and change dataframe to the dataframe strarified by time periods. Then run for every period.
+Each model (B–F) has corresponding training and evaluation scripts located in the `full_fine_tuning/` folder.  
+Fake-temporal baselines (with irrelevant year prompts) are also included for models C–F.
 
-Then, we train the soft gating mechanism and evaluate it via soft gating and hard gating. We also evaluate sets of experts via rule-basd gate (oracle).
+Key implementation details:
 
-All scripts are made availible in the folder MoE.
+- Models **D–F** differ in the natural language prompts generated in `prepare_chunks`
+- Model **C** requires modifying the tokenizer to add special tokens
+- Model **B** has no temporal input modifications
+
+---
+
+## Mixture of Experts (MoE)
+
+To adapt CLMET for Mixture of Experts:
+
+1. **Stratify** `train_df`, `val_df`, and `test_df` by the `yearRange` column  
+2. **Split** each into 3 temporal periods, resulting in 9 datasets total  
+3. **Save** them into a designated folder
+
+Next:
+
+- Fine-tune models using configurations **B**, **C**, and **E** on each subset (see `full_fine_tuning/`)
+- Train the soft gating model using expert outputs
+- Evaluate using:
+  - **Soft gating**
+  - **Hard gating**
+  - **Oracle-based** gating (rule-based)
+
+All relevant training and evaluation scripts are provided in the `MoE/` folder.
+
+---
 
 ## Year Prediction
 
-To applu results of Mixture of Experts beyond text generation, we developed a liner function used to predict the year said text was published it. This function is availible in year_prediction.ipynb. It takes gate weights as an input and outputspredicted year. Please refer to the thesis monuscript for the methodological details.
+To extend MoE outputs beyond generation, we developed a **year prediction heuristic**.  
+The notebook `year_prediction.ipynb` takes MoE gate weights as input and predicts the publication year.
+
+Refer to the thesis manuscript for methodology details and the definition of the linear mapping function.
+
+---
+
+## Citation
+
+If you use this code or build upon this work, please cite the associated thesis:
+
+> *Ksenia Dvorkina, “Temporal Adaptation Techniques in Diachronic Language Modelling,” Master’s thesis, University of Vienna, 2025.*
+
+---
