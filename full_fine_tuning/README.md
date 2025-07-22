@@ -39,8 +39,10 @@ Fake temporal embeddings (with incorrect or misleading date information) are als
 
 To run training or evaluation for any model:
 
-1. Activate your virtual environment
-2. Adjust `full_fine_tuning_job_sample.sh` to match the desired model script
-3. Submit via SLURM:  
+1. Create your virtual environment using `requirements.txt`
+2. Pre-process data using `data_cleaning_CLMET.ipynd` and place resulting test_df, val_df and train_df in the correct folder, adjust paths
+3. Adjust `full_fine_tuning_job_sample.sh` to match the desired model script and path of your virtual environment
+4. Submit via SLURM:  
    ```bash
    sbatch full_fine_tuning_job_sample.sh
+5. Retrieve log file once job is finished
