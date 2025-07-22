@@ -17,11 +17,28 @@ This thesis employs CLMET 3.1 as dataset. This corpues is freely availible to do
 To pre-process the data, clean and aplit it, jupited notebook data_cleaning_CLMET.ipynb was used. To reproduce this research, please download CLMET and follow steps in this notebook. Then, save train_df, val_df, test_df to your designated folder.
 
 ## Full fine-tuning
+During the full fine-tuning, we use varuios temporal adaptation strategies. To illustrate the various temporal embedding strategies, we use a sample text CLMET3_1_1_67. This sample, beginning with the phrase “Preface Of The Author.” and dated to the year 1776, serves as a running example to show how each temporal embedding is incorporated during the encoding preparation phase.  (see table):
 
+Model	Model Description	Embedding	Example Input (for CLMET3_1_1_67 text)
+B	Fine-tuned OLMo 1B	No temporal conditioning	Preface Of The Author...
+C	Fine-tuned OLMo 1B + year ranges as special tokens	Special year range tokens like [1710–1780], [1780–1850] and [1850–1920] prepended	[1710–1780] Preface Of The Author...
+D	Fine-tuned OLMo 1B + year range in natural language prompts	Year range in natural language	This is English text written between 1710 and 1780.\n\nPreface Of The Author...
+E	Fine-tuned OLMo 1B + exact year in natural language prompts	Exact year in natural language	This text was written in the year 1776.\n\nPreface Of The Author...
+F	Fine-tuned OLMo 1B + exact year (word) in natural language	Exact year as a single word in natural language	1776.\n\nPreface Of The Author...
+
+For each adaptation strategy, we provide a separate pythin script for training and eval, and for testing. All scripts are named after model configuration (B-F) are are made availible in the subfolder full_fine_tuning. Scripts for evaluation strategies with fake temporal embeddings for models C-F are also availible in this folder.
+
+Scripts of models D-F only differ in natural language prompt from the function prepare_chunks, while for the model C we also add tokens and resize the tokeniser, and for the model B we do not use any explicit temporal embeddings.
 
 ## Mixture of Experts
 
 To adapt existing data split for Mixture of Experts, pleqase simply stratify the exiting train_df, val_df, test_df by yearRange column and save nine resulting datasets in a designated folder.
+
+Then, we use strategies B, C and E from the fine-tuning section to create subsets of experts. To achieve this, simply take the desired script from the privious section and change dataframe to the dataframe strarified by time periods. Then run for every period.
+
+Then, we train the soft gating mechanism and evaluate it via soft gating and hard gating. We also evaluate sets of experts via rule-basd gate (oracle).
+
+All scripts are made availible in the folder MoE.
 
 ## Year Prediction
 
