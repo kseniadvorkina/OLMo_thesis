@@ -14,10 +14,15 @@ A dedicated Python virtual environment was used for all jobs. Exact list of need
 
 This thesis employs CLMET 3.1 as dataset. This corpues is freely availible to download at https://fedora.clarin-d.uni-saarland.de/clmet/clmet.html.
 
-To pre-process the data, clean and aplit it, jupited notebook data_cleaning_CLMET.ipynb was used. To reproduce this research, please download CLMET and follow steps in this notebook.
+To pre-process the data, clean and aplit it, jupited notebook data_cleaning_CLMET.ipynb was used. To reproduce this research, please download CLMET and follow steps in this notebook. Then, save train_df, val_df, test_df to your designated folder.
 
 # Full fine-tuning
 
 
-
 # Mixture of Experts
+
+To adapt existing data split for Mixture of Experts, pleqase simply stratify the exiting train_df, val_df, test_df by 
+
+# Year Prediction
+
+Year Prediction 
