@@ -25,4 +25,4 @@ To adapt existing data split for Mixture of Experts, pleqase simply stratify the
 
 ## Year Prediction
 
-To applu results of Mixture of Experts beyond text generation, we developed a liner function used to predict the year said text was published it. This function is availible in . It taked gate weights as an input and outputspredicted year. Should you derise to tune the confidence threshold for the year prediction, fucntion to collect statistics on that is also availible in this script. Please refer to the thesis monuscript for the methodological details.
+To applu results of Mixture of Experts beyond text generation, we developed a liner function used to predict the year said text was published it. This function is availible in year_prediction.ipynb. It takes gate weights as an input and outputspredicted year. Please refer to the thesis monuscript for the methodological details.
