@@ -10,6 +10,8 @@ All experiments in this thesis were conducted using the Galadriel node on SLURM 
 Node used ofr this thesis is equipped with four NVIDIA H100 Tensor Core GPUs, 192 logical CPU cores, and approximately 2 TB of RAM. The system runs on an x86_64 architecture and uses the Miniforge distribution for environment management. At least one such GPU is reired to replicate results of this thesis.
 A dedicated Python virtual environment was used for all jobs. Exact list of needed libraries is availible in requirements.txt.
 
+To run jobs on the SLURM cluster, Terminal scripts .sh are ctreated. They outline required computational resources for every job and define logging. Jobs were then run via sbatch, and the outpit was later taken from the log files. In addition, we save model after fine-tuning and save gating weights for MoE.
+
 ## Data Preparation
 
 This thesis employs CLMET 3.1 as dataset. This corpues is freely availible to download at https://fedora.clarin-d.uni-saarland.de/clmet/clmet.html.
