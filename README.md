@@ -13,6 +13,7 @@ This repository is structured as follows:
 
 - `full_fine_tuning/`: Scripts for full fine-tuning with various temporal adaptation strategies (models B–F)
 - `MoE/`: Scripts for training and evaluating Mixture of Experts
+- `base_models_test/`: Scripts for testing the original OLMo base models
 - `data_cleaning_CLMET.ipynb`: Preprocessing and cleaning of the CLMET dataset
 - `year_prediction.ipynb`: Predicts publication year from MoE gate weights
 - `requirements.txt`: Python dependencies
@@ -105,6 +106,15 @@ To extend MoE outputs beyond generation, we developed a **year prediction heuris
 The notebook `year_prediction.ipynb` takes MoE gate weights as input and predicts the publication year.
 
 Refer to the thesis manuscript for methodology details and the definition of the linear mapping function.
+
+---
+
+## Base Models Testing
+
+To compare the performance of temporally adapted models with non-adapted baselines, use the scripts provided in the `base_models_test/` folder.
+These scripts evaluate pre-trained base models (e.g. unmodified OLMo) on the CLMET dataset without any temporal adaptation.
+
+Shell scripts for SLURM job submission are also included in this folder.
 
 ---
 
