@@ -45,7 +45,14 @@ test_df = test_df.sample(frac=1, random_state=seed).reset_index(drop=True)
 
 # In[9]:
 
+import random
+
 def prepare_chunks(text, time_token, max_context_size=2048):
+    all_ranges = ["[1710-1780]", "[1780-1850]", "[1850-1920]"]
+    # Randomly pick a wrong time token different from the correct one
+    wrong_choices = [r for r in all_ranges if r != time_token]
+    fake_time_token = random.choice(wrong_choices)
+
     # Reserve space for the time token and eos_token
     max_chunk_size = max_context_size - 2
 
@@ -58,10 +65,10 @@ def prepare_chunks(text, time_token, max_context_size=2048):
         for i in range(0, len(input_ids), max_chunk_size)
     ]
 
-    # Add the time token and eos_token to each chunk
+    # Add the *wrong* time token and eos_token to each chunk
     processed_chunks = [
         torch.cat([
-            torch.tensor([tokenizer.convert_tokens_to_ids(time_token)]),
+            torch.tensor([tokenizer.convert_tokens_to_ids(fake_time_token)]),
             chunk,
             torch.tensor([tokenizer.eos_token_id])
         ])
@@ -69,6 +76,7 @@ def prepare_chunks(text, time_token, max_context_size=2048):
     ]
 
     return processed_chunks
+
 
 
 # Prepare encodings dynamically from a dataframe

@@ -18,13 +18,13 @@ import torch.multiprocessing as mp
 import bitsandbytes
 import sys
 import gc
-
+import random
 
 
 device = torch.device("cuda")
 pin_memory_setting = True
 
-model_dir = "./fine_tuned_model_C"
+model_dir = "./fine_tuned_model_E"
 
 # Load the model and tokenizer in bfloat16
 model = AutoModelForCausalLM.from_pretrained(
@@ -37,7 +37,6 @@ model = torch.nn.DataParallel(model)
 model.to(device)
 
 
-
 test_df  = pd.read_csv("./data_OLMo/test_df.csv")
 seed = 42
 test_df = test_df.sample(frac=1, random_state=seed).reset_index(drop=True)
@@ -45,39 +44,46 @@ test_df = test_df.sample(frac=1, random_state=seed).reset_index(drop=True)
 
 # In[9]:
 
-def prepare_chunks(text, time_token, max_context_size=2048):
-    # Reserve space for the time token and eos_token
-    max_chunk_size = max_context_size - 2
 
-    # Tokenize the full text
-    input_ids = tokenizer(text, return_tensors="pt", truncation=False)["input_ids"][0]
+def prepare_chunks(text, year, max_context_size=2048):
+    year = int(year)
+    year = random.choice([y for y in range(1710, 1921) if abs(y - year) >= 70])
 
-    # Split into chunks of max_chunk_size
-    chunks = [
-        input_ids[i:i + max_chunk_size]
-        for i in range(0, len(input_ids), max_chunk_size)
+    # Create a natural-language temporal prompt
+    time_prompt = f"This text was written in the year {year}.\n\n"
+
+    # Tokenize the time prompt and the full text
+    time_prompt_ids = tokenizer(time_prompt, return_tensors="pt", truncation=False)["input_ids"][0]
+    text_ids = tokenizer(text, return_tensors="pt", truncation=False)["input_ids"][0]
+
+    # Reserve space for eos_token and the prompt in each chunk
+    max_chunk_size = max_context_size - len(time_prompt_ids) - 1
+
+    # Split text into chunks
+    text_chunks = [
+        text_ids[i:i + max_chunk_size]
+        for i in range(0, len(text_ids), max_chunk_size)
     ]
 
-    # Add the time token and eos_token to each chunk
+    # Add prompt and eos token to each chunk
     processed_chunks = [
         torch.cat([
-            torch.tensor([tokenizer.convert_tokens_to_ids(time_token)]),
+            time_prompt_ids,
             chunk,
             torch.tensor([tokenizer.eos_token_id])
         ])
-        for chunk in chunks
+        for chunk in text_chunks
     ]
 
     return processed_chunks
 
 
-# Prepare encodings dynamically from a dataframe
 def prepare_encodings(df_subset):
     encodings = []
     for _, row in df_subset.iterrows():
         text = row['cleaned_text']
-        time_token = row['yearRange']  # Use yearRange as the special time token
-        encodings.extend(prepare_chunks(text, time_token))
+        year = row['printedDate']
+        encodings.extend(prepare_chunks(text, year))
     return encodings
 
 # Dataset class
@@ -148,10 +154,10 @@ with torch.no_grad():
         labels = input_ids
         outputs = model(input_ids=input_ids, labels=labels)
         loss = outputs.loss
+        #test_results.append(outputs.logits.cpu())  # Move results to CPU to free GPU memory
         test_results.append(outputs.loss.item())
         print(f"Batch loss: {loss.item()}")
 
    
 avg_loss = sum(test_results) / len(test_results) if test_results else 0
 print(f"Average test loss: {avg_loss}, Average test perplexity: {torch.exp(torch.tensor(avg_loss))}")
-

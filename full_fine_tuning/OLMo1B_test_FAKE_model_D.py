@@ -18,13 +18,16 @@ import torch.multiprocessing as mp
 import bitsandbytes
 import sys
 import gc
+import random
+
 
 
 
 device = torch.device("cuda")
 pin_memory_setting = True
+#print("Running on GPU:", torch.cuda.get_device_name(device))
 
-model_dir = "./fine_tuned_model_C"
+model_dir = "./fine_tuned_model_D"
 
 # Load the model and tokenizer in bfloat16
 model = AutoModelForCausalLM.from_pretrained(
@@ -33,9 +36,10 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 tokenizer = AutoTokenizer.from_pretrained(model_dir)
 
+#model.to(device)
+
 model = torch.nn.DataParallel(model)
 model.to(device)
-
 
 
 test_df  = pd.read_csv("./data_OLMo/test_df.csv")
@@ -45,27 +49,34 @@ test_df = test_df.sample(frac=1, random_state=seed).reset_index(drop=True)
 
 # In[9]:
 
-def prepare_chunks(text, time_token, max_context_size=2048):
-    # Reserve space for the time token and eos_token
-    max_chunk_size = max_context_size - 2
+def prepare_chunks(text, yearRange, max_context_size=2048):
 
-    # Tokenize the full text
-    input_ids = tokenizer(text, return_tensors="pt", truncation=False)["input_ids"][0]
+    all_ranges = ["[1710-1780]", "[1780-1850]", "[1850-1920]"]
+    fake_range = random.choice([r for r in all_ranges if r != yearRange])
+    yearRange = fake_range.strip("[]")
+    time_prompt = f"This is English text written between {yearRange}.\n\n"
 
-    # Split into chunks of max_chunk_size
-    chunks = [
-        input_ids[i:i + max_chunk_size]
-        for i in range(0, len(input_ids), max_chunk_size)
+    # Tokenize the time prompt and the full text
+    time_prompt_ids = tokenizer(time_prompt, return_tensors="pt", truncation=False)["input_ids"][0]
+    text_ids = tokenizer(text, return_tensors="pt", truncation=False)["input_ids"][0]
+
+    # Reserve space for eos_token and the prompt in each chunk
+    max_chunk_size = max_context_size - len(time_prompt_ids) - 1
+
+    # Split text into chunks
+    text_chunks = [
+        text_ids[i:i + max_chunk_size]
+        for i in range(0, len(text_ids), max_chunk_size)
     ]
 
-    # Add the time token and eos_token to each chunk
+    # Add prompt and eos token to each chunk
     processed_chunks = [
         torch.cat([
-            torch.tensor([tokenizer.convert_tokens_to_ids(time_token)]),
+            time_prompt_ids,
             chunk,
             torch.tensor([tokenizer.eos_token_id])
         ])
-        for chunk in chunks
+        for chunk in text_chunks
     ]
 
     return processed_chunks
@@ -75,10 +86,11 @@ def prepare_chunks(text, time_token, max_context_size=2048):
 def prepare_encodings(df_subset):
     encodings = []
     for _, row in df_subset.iterrows():
+        yearRange = row['yearRange']
         text = row['cleaned_text']
-        time_token = row['yearRange']  # Use yearRange as the special time token
-        encodings.extend(prepare_chunks(text, time_token))
+        encodings.extend(prepare_chunks(text, yearRange))
     return encodings
+
 
 # Dataset class
 class FineTuneDataset(Dataset):
@@ -148,6 +160,7 @@ with torch.no_grad():
         labels = input_ids
         outputs = model(input_ids=input_ids, labels=labels)
         loss = outputs.loss
+        #test_results.append(outputs.logits.cpu())  # Move results to CPU to free GPU memory
         test_results.append(outputs.loss.item())
         print(f"Batch loss: {loss.item()}")
 
