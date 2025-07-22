@@ -16,13 +16,12 @@ This repository is structured as follows:
 - `data_cleaning_CLMET.ipynb`: Preprocessing and cleaning of the CLMET dataset
 - `year_prediction.ipynb`: Predicts publication year from MoE gate weights
 - `requirements.txt`: Python dependencies
-- Sample `.sh` scripts: SLURM job definitions for training and evaluation
 
 ---
 
 ## Computational Resources
 
-All experiments were conducted on the **Galadriel** node of the SLURM cluster at the University of Vienna.  
+All experiments were conducted on the **Galadriel** node of the SLURM cluster at the University of Vienna, Faculty of Computer Science.  
 Due to the scale of the models and data, training and evaluation cannot be replicated on a standard PC. Access to substantial compute is required.
 
 **Galadriel node specifications:**
@@ -33,13 +32,9 @@ Due to the scale of the models and data, training and evaluation cannot be repli
 - `x86_64` architecture  
 - Miniforge-based Python environment
 
-A dedicated virtual environment was used for all experiments.  
-Dependencies are listed in `requirements.txt`.
+A dedicated virtual environment was used for all experiments.  Dependencies are listed in `requirements.txt`.
 
-Jobs were submitted using SLURM with `.sh` shell scripts.  
-These scripts define resource requests and log outputs.  
-Models and MoE gate weights were saved after each run.  
-Sample job scripts are available in the respective folders.
+Jobs were submitted using SLURM with `.sh` shell scripts via `sbatch`. These scripts define resource requests and log outputs. Models and MoE gate weights were saved after each run. Sample job scripts are available in the respective folders.
 
 ---
 
@@ -52,9 +47,9 @@ To prepare the data:
 
 1. Open and run `data_cleaning_CLMET.ipynb`
 2. Follow the notebook steps to clean, split, and save:
-   - `train_df.pkl`
-   - `val_df.pkl`
-   - `test_df.pkl`
+   - `train_df.csv`
+   - `val_df.csv`
+   - `test_df.csv`
 
 Place the resulting files in your designated data directory.
 
@@ -74,13 +69,13 @@ To illustrate the input transformations, we use a sample text (`CLMET3_1_1_67`, 
 | **F** | OLMo 1B + exact year as word | Natural language | `1776.\n\nPreface Of The Author...` |
 
 Each model (B–F) has corresponding training and evaluation scripts located in the `full_fine_tuning/` folder.  
-Fake-temporal baselines (with irrelevant year prompts) are also included for models C–F.
+Fake-temporal baselines (with wrong year prompts) are also included for models C–F.
 
 Key implementation details:
 
-- Models **D–F** differ in the natural language prompts generated in `prepare_chunks`
+- Models **D–F** only differ in the natural language prompts generated in `prepare_chunks`
 - Model **C** requires modifying the tokenizer to add special tokens
-- Model **B** has no temporal input modifications
+- Model **B** has no explicit temporal input modifications
 
 ---
 
@@ -88,14 +83,13 @@ Key implementation details:
 
 To adapt CLMET for Mixture of Experts:
 
-1. **Stratify** `train_df`, `val_df`, and `test_df` by the `yearRange` column  
-2. **Split** each into 3 temporal periods, resulting in 9 datasets total  
-3. **Save** them into a designated folder
+1. **Split** `train_df`, `val_df`, and `test_df` into 3 temporal periods by the `yearRange` column, resulting in 9 datasets total 
+2. **Save** them into a designated folder
 
 Next:
 
-- Fine-tune models using configurations **B**, **C**, and **E** on each subset (see `full_fine_tuning/`)
-- Train the soft gating model using expert outputs
+- Fine-tune expert models using desired configurations from `full_fine_tuning/` on each subset; if you wish to replicate results of this thesis, choose  **B**, **C**, and **E**
+- Train the soft gating model using expert outputs using a script from `MoE/`
 - Evaluate using:
   - **Soft gating**
   - **Hard gating**
