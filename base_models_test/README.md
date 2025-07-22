@@ -4,9 +4,9 @@ This folder contains scripts for evaluating **pre-trained OLMo models** on the C
 
 **Included scripts:**
 
-- `OLMo1B_base_test.py` — Evaluates the 1B model  
-- `OLMo7B_base_test.py` — Evaluates the 7B model  
-- `OLMo13B_base_test.py` — Evaluates the 13B model  
+- `OLMo1B_base_test.py` — Evaluates OLMo 1B model  
+- `OLMo7B_base_test.py` — Evaluates OLMo 7B model  
+- `OLMo13B_base_test.py` — Evaluates OLMo 13B model  
 
 **Batch job script:**
 
