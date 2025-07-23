@@ -11,7 +11,7 @@ Due to how the models are implemented, validation and test in this configuration
 
 Next:
 
-- Fine-tune expert models using desired configurations from `full_fine_tuning/` on each subset; if you wish to replicate results of this thesis, choose  **B**, **C**, and **E**
+- Fine-tune expert models using desired configurations from `full_fine_tuning/` on each subset; if you wish to replicate results of this thesis, choose  **B** (No temporal embeddings), **C** (Year range Special tokens), and **E** (exact year in natural language prompt)
 - Train the soft gating model using expert outputs using a script from `MoE/`
 - Evaluate using:
   - **Soft gating**
