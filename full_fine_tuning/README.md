@@ -16,6 +16,8 @@ Each model implements a different strategy for temporal adaptation, applied to t
 - `OLMo1B_test_FAKE_model_C.py` to `OLMo1B_test_FAKE_model_F.py` — Corresponding testing scripts with incorrect temporal embeddigns (see *Evaluation with Incorrect Temporal Embeddings* below)
 - `full_fine_tuning_job_sample.sh` — SLURM script template for submitting full fine-tuning jobs (train, val, test)
 
+---
+
 ### Model Overview
 
 | Model | Temporal Embedding Strategy | Example Input |
