@@ -1,4 +1,4 @@
-### `base_models_test/` Folder
+## Base Models Test `base_models_test/` Folder
 
 This folder contains scripts for evaluating **pre-trained OLMo models** on the CLMET dataset without any temporal adaptation. These results serve as a baseline for comparison with fine-tuned and temporally adapted models.
 
