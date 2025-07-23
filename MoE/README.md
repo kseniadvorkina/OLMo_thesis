@@ -92,7 +92,7 @@ Scripts are grouped by expert configuration (**B**, **C**, **E**) and function:
 ### Usage
 
 1. **Train experts** using temporally split datasets (see `full_fine_tuning/`)
-2. **Train MoE gate** using the corresponding `*_train.py` script
-3. **Evaluate** with one or more of the `*_test_*.py` scripts
+2. **Train MoE gate** using the corresponding `_train.py` script
+3. **Evaluate** with one or more of the `_test_.py` scripts
 4. (Optional) Save gate weights for downstream tasks, this fucntionality is availible at soft gating test (e.g., year prediction)
 
