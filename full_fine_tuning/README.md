@@ -1,4 +1,4 @@
-## `full_fine_tuning/` Folder
+## Full Fine-tuning `full_fine_tuning/` Folder
 
 This folder contains training and evaluation scripts for models B–F used in the full fine-tuning experiments.
 
