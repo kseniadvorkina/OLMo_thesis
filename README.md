@@ -96,6 +96,8 @@ Next:
   - **Hard gating**
   - **Oracle-based** gating (rule-based)
 
+In addition to the 1B experiments, we applied the Mixture of Experts approach to the OLMo 7B model using the same temporal splits and prompt strategy as Model E. Expert models were fine-tuned individually on each temporal range, and the MoE gate was trained and evaluated in the same manner as for 1B.
+
 All relevant training and evaluation scripts are provided in the `MoE/` folder.
 
 ---
