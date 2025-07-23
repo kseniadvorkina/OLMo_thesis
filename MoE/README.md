@@ -84,7 +84,7 @@ Scripts are grouped by expert configuration (**B**, **C**, **E**) and function:
 - `OLMo1B_MoE_E_test_rule_based.py`
 
 #### MoE Model E (OLMo 7B)
-- `OLMo1B_MoE_E_train.py` — Train gate using 7B experts (E configuration)
+- `OLMo7B_5epochs_train_MoE_E.py` — Train gate using 7B experts (E configuration)
 - Reuse the OLMo 1B MoE (E) evaluation scripts for testing, as described above
   
 ---
