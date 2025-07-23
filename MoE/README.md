@@ -1,4 +1,4 @@
-## Mixture of Experts `MoE/` folder.
+### Mixture of Experts `MoE/` Folder.
 
 To adapt CLMET for Mixture of Experts:
 
