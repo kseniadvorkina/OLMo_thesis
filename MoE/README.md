@@ -1,11 +1,12 @@
-## Mixture of Experts — `MoE/` Folder
+# Mixture of Experts — `MoE/` Folder
 
 This folder contains scripts for training and evaluating **Mixture of Experts (MoE)** models for temporal adaptation on the CLMET dataset.  
-The approach builds on fine-tuned OLMo 1B experts trained on specific historical periods and combines them using soft or rule-based gating mechanisms.
+The approach builds on fine-tuned OLMo 1B experts trained on specific historical periods and combines them using soft or rule-based gating mechanisms.  
+We also investigate whether diachronic adaptation benefits scale with model size by adapting the MoE approach to the larger OLMo 7B model.
 
 ---
 
-### Data Preparation
+## Data Preparation
 
 To adapt CLMET for Mixture of Experts:
 
@@ -19,7 +20,7 @@ Then, retain the original full `train_df`, `val_df`, and `test_df` files for **t
 
 ---
 
-### Expert Models
+## Expert Models
 
 To create expert models:
 
@@ -33,7 +34,7 @@ Train one expert per temporal period per configuration. These experts will then 
 
 ---
 
-### Gating Mechanism
+## Gating Mechanism
 
 After training the experts, use the scripts in this folder to train and evaluate the **Mixture of Experts gate**.
 
@@ -45,9 +46,16 @@ Three evaluation strategies are supported:
 
 ---
 
-### Scaling Up: MoE with OLMo 7B
+## Scaling Up: MoE with OLMo 7B
 
-To assess whether diachronic adaptation benefits scale with model size, we fine-tuned the larger **OLMo 7B** model using the best-performing configuration (**Model E**) and trained a corresponding MoE system.
+To assess whether diachronic adaptation benefits scale with model size, we fine-tuned the larger **OLMo 7B** model using the best-performing configuration (**Model E**).  
+We trained a corresponding OLMo 7B MoE (E) gate using the script below. The evaluation scripts used for OLMo 1B MoE (E) can be **reused** without modification — just ensure that:
+
+- Expert paths point to the 7B fine-tuned models
+- Gate weights are loaded using:
+
+  ```python
+  moe_model.gate.load_state_dict(torch.load("moe_gate_7B_E_epoch3.pt", map_location=device))
 
 > Note: This step requires significant compute — at least one H100 GPU per training job.
 
@@ -57,24 +65,28 @@ To assess whether diachronic adaptation benefits scale with model size, we fine-
 
 Scripts are grouped by expert configuration (**B**, **C**, **E**) and function:
 
-#### Model B
+#### MoE Model B (OLMo 1B)
 - `OLMo1B_MoE_B_train.py` — Train gate using Model B experts
 - `OLMo1B_MoE_B_test_soft_gate.py` — Evaluate using soft gating
 - `OLMo1B_MoE_B_test_argmax.py` — Evaluate using hard (argmax) gating
 - `OLMo1B_MoE_B_test_rule_based.py` — Evaluate using oracle gating
 
-#### Model C
+#### MoE Model C (OLMo 1B)
 - `OLMo1B_MoE_C_train.py`
 - `OLMo1B_MoE_C_test_soft_gate.py`
 - `OLMo1B_MoE_C_test_argmax.py`
 - `OLMo1B_MoE_C_test_rule_based.py`
 
-#### Model E
+#### MoE Model E (OLMo 1B)
 - `OLMo1B_MoE_E_train.py`
 - `OLMo1B_MoE_E_test_soft_gate.py`
 - `OLMo1B_MoE_E_test_argmax.py`
 - `OLMo1B_MoE_E_test_rule_based.py`
 
+#### MoE Model E (OLMo 7B)
+- `OLMo1B_MoE_E_train.py` — Train gate using 7B experts (E configuration)
+- Reuse the OLMo 1B MoE (E) evaluation scripts for testing, as described above
+  
 ---
 
 ### Usage
@@ -82,11 +94,5 @@ Scripts are grouped by expert configuration (**B**, **C**, **E**) and function:
 1. **Train experts** using temporally split datasets (see `full_fine_tuning/`)
 2. **Train MoE gate** using the corresponding `*_train.py` script
 3. **Evaluate** with one or more of the `*_test_*.py` scripts
-4. (Optional) Log gate weights for downstream tasks (e.g., year prediction)
+4. (Optional) Save gate weights for downstream tasks, this fucntionality is availible at soft gating test (e.g., year prediction)
 
----
-
-Let me know if you would like to include:
-- SLURM job templates here
-- A table summarising which scripts use which gating strategy
-- Results plots or evaluation metrics as output screenshots
