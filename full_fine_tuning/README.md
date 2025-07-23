@@ -12,7 +12,8 @@ Each model implements a different strategy for temporal adaptation, applied to t
 - `OLMo1B_train_val_model_E.py` — Train and evaluate model E (exact year in natural language)  
 - `OLMo1B_train_val_model_F.py` — Train and evaluate model F (year as a single word)  
 
-- `OLMo1B_test_model_B.py` to `OLMo1B_test_model_F.py` — Corresponding testing scripts  
+- `OLMo1B_test_model_B.py` to `OLMo1B_test_model_F.py` — Corresponding testing scripts
+- `OLMo1B_test_FAKE_model_C.py` to `OLMo1B_test_FAKE_model_F.py` — Corresponding testing scripts with incorrect temporal embeddigns (see *Evaluation with Incorrect Temporal Embeddings* below)
 - `full_fine_tuning_job_sample.sh` — SLURM script template for submitting full fine-tuning jobs (train, val, test)
 
 ### Model Overview
@@ -33,9 +34,37 @@ Each model implements a different strategy for temporal adaptation, applied to t
   - The `time_prompt` string is generated differently for each (year range, full sentence with year, or year as a word).
   - Additionally, models E and F rely on retrieving the `year` from the dataset via `prepare_encodings()` and passing it into `prepare_chunks()`. Model D retrieves and passes `yearRange`.
 
-Fake temporal embeddings (with incorrect or misleading date information) are also used in evaluation to test the sensitivity of models C–F to temporal conditioning.
 
 ---
+
+### Evaluation with Incorrect Temporal Embeddings
+
+To assess the effectiveness of temporal conditioning strategies, we performed additional evaluations using **deliberately incorrect temporal information**.
+
+This setup tests whether the models rely meaningfully on temporal cues or simply ignore them.
+
+**Key details:**
+
+- **Model B** was excluded, as it does not use any temporal embeddings.
+- **Models C and D** (trained with year ranges):
+  - The correct time range token (C) or natural language year range (D) was replaced with a **random incorrect time period** from outside the original context.
+- **Models E and F** (trained with exact years):
+  - The correct year in the prompt was replaced with a **random year from a different time period**.
+
+**Fake evaluation scripts:**
+
+- `OLMo1B_test_FAKE_model_C.py`  — Evaluate model C (special tokens year ranges)  with incorrect temporal time tokens
+- `OLMo1B_test_FAKE_model_D.py`  — Evaluate model D (year range in natural language)  with incorrect year ranges
+- `OLMo1B_test_FAKE_model_E.py`  — Evaluate model E (exact year in natural language)  with incorrect years
+- `OLMo1B_test_FAKE_model_F.py`  — Evaluate model F (year as a single word)  with incorrect years
+
+
+These scripts are included in this folder and mirror the structure of the original testing scripts, with modifications applied during input preparation.
+
+Use these evaluations to compare model sensitivity to temporal misalignment and report performance degradation (if any) in your results.
+
+---
+
 
 To run training or evaluation for any model:
 
