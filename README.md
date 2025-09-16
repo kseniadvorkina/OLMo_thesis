@@ -1,6 +1,6 @@
 # Master Thesis: Temporal Adaptation Techniques in Diachronic Language Modelling
 
-This repository contains the codebase for the master’s thesis *Temporal Adaptation Techniques in Diachronic Language Modelling*.  
+This repository contains the codebase for the master’s thesis *Temporal Adaptation Techniques in Diachronic Language Modelling*.  Full text availible online at https://utheses.univie.ac.at/detail/76983/.
 It implements several fine-tuning and adaptation strategies for historical language modelling, including a Mixture of Experts (MoE) architecture trained on temporally split English corpora.  
 Key components include temporal conditioning, soft-gated expert selection, and a year prediction heuristic based on gating probabilities.  
 Experiments are conducted on the CLMET corpus, using OLMo models and the Hugging Face ecosystem.
