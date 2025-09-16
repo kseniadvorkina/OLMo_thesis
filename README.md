@@ -7,7 +7,7 @@ Key components include temporal conditioning, soft-gated expert selection, and a
 Experiments are conducted on the CLMET corpus, using OLMo models and the Hugging Face ecosystem.
 
 
-Full text available online at https://utheses.univie.ac.at/detail/76983/.
+[Full text available online](https://utheses.univie.ac.at/detail/76983/).
 
 ---
 
